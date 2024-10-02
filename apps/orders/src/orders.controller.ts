@@ -1,6 +1,6 @@
 import { Controller, Get, UseInterceptors } from '@nestjs/common';
 import { OrdersService } from './orders.service';
-import { FileInterceptor } from '@nestjs/platform-express';
+//import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('orders')
 export class OrdersController {
