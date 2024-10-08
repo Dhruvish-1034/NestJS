@@ -1,23 +1,44 @@
-import { Column, CreateDateColumn, DeleteDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import {
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+import { Order } from './order.entity';
+import { userStatus } from 'apps/shared/common/type';
 
-
-@Entity({ name: 'users'})
+@Entity({ name: 'user' })
 export class User {
-    @PrimaryGeneratedColumn({ type: 'bigint' })
-    id: number;
+  @PrimaryGeneratedColumn({ type: 'bigint' })
+  id: number;
 
-    @Column({ nullable: false })
-    name: string;
+  @Column({ nullable: false })
+  full_name: string;
 
-    @Column({ nullable: false })
-    age: number
+  @Column({ nullable: false, unique: true })
+  email: string;
 
-    @CreateDateColumn()
-    createdAt: Date;
+  @Column({ nullable: false })
+  password: string;
 
-    @UpdateDateColumn() 
-    updatedAt: Date;
+  @Column({ nullable: false })
+  profile_image: string
 
-    @DeleteDateColumn()
-    deletedAt: Date;
+  @Column({ type: 'enum', enum: ['Active', 'Inactive'], default: 'Active' })
+  status: userStatus;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
+
+  @DeleteDateColumn()
+  deletedAt: Date;
+
+  @OneToMany(() => Order, (order) => order.user)
+  orders: Order[];
 }
