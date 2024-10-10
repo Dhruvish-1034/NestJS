@@ -4,6 +4,7 @@ import { Order } from '../../shared/src/typeORM/entities/order.entity';
 import { User } from 'apps/shared/src/typeORM/entities/user.entity';
 import { Repository } from 'typeorm';
 import { createOrder, updateOrder } from './libs/types';
+import { createOrderDTO } from './dtos/order.dto';
 
 @Injectable()
 export class OrdersService {
@@ -12,21 +13,11 @@ export class OrdersService {
     @InjectRepository(User) private userModel: Repository<User>,
   ) {}
 
-  async createOrder(id: number, data: createOrder): Promise<any> {
+  async createOrder(data: createOrder): Promise<any> {
     try {
-      const user = await this.userModel.findOne({ where: { id } });
-
-      if (!user) {
-        throw new HttpException(
-          {
-            message: 'No User Found',
-          },
-          HttpStatus.NOT_FOUND,
-        );
-      }
-
-      const newOrder = this.orderModel.create({ ...data, user });
-      return await this.orderModel.insert(newOrder);
+      const response = this.orderModel.create(data);
+      //await this.orderModel.insert(response)
+      return response;
     } catch (err) {
       throw new HttpException(
         {
@@ -87,5 +78,9 @@ export class OrdersService {
         err.status || HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
+  }
+
+  async createOrderAck(data: createOrderDTO) {
+    return { message: 'Order has been Successfully created', data };
   }
 }

@@ -14,3 +14,8 @@ export type updateUser = {
   name?: string;
   profile_image: string;
 };
+
+export type createOrder = {
+  no_of_items: number;
+  total_price: number;
+};

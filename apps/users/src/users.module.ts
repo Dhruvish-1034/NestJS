@@ -12,10 +12,13 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { MulterModule } from '@nestjs/platform-express';
 import * as path from 'path';
 import { Query } from 'apps/shared/common/query';
+import { ClientsModule, Transport } from '@nestjs/microservices';
+import { OrdersModule } from 'apps/orders/src/orders.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature(models),
+    OrdersModule,
     SharedModule,
     JwtModule.register({
       global: true,
@@ -25,7 +28,13 @@ import { Query } from 'apps/shared/common/query';
     ScheduleModule.forRoot(),
     MulterModule.register({
       dest: path.join(__dirname, '..', 'upload'),
-    })
+    }),
+    ClientsModule.register([
+      {
+        name: "ORDER_SERVICE",
+        transport: Transport.TCP,
+      }
+    ]),
   ],
   controllers: [UsersController],
   providers: [

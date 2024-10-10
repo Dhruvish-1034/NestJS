@@ -1,16 +1,24 @@
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus, Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../../shared/src/typeORM/entities/user.entity';
+import { Order } from 'apps/shared/src/typeORM/entities/order.entity';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
-import { signIn, signUp, updateUser } from './utils/types';
+import { signIn, signUp, updateUser, createOrder } from './utils/types';
 import { Query } from 'apps/shared/common/query';
+import { ClientProxy } from '@nestjs/microservices';
+import { OrdersService } from 'apps/orders/src/orders.service';
+import { lastValueFrom, Observable } from 'rxjs';
+import { response } from 'express';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User) private userModel: Repository<User>,
+    @InjectRepository(User) private orderModel: Repository<Order>,
+    @Inject("ORDER_SERVICE") private orderClient: ClientProxy,
     private jwtService: JwtService,
+    private ordersService: OrdersService,
     private query: Query,
   ) {}
 
@@ -142,6 +150,38 @@ export class UsersService {
       let users = { 'No. of users': userCount ? userCount : 0 };
 
       return users;
+    } catch (err) {
+      throw new HttpException(
+        {
+          message: err.message || 'Internal server error',
+          status: err.status,
+        },
+        err.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async initOrder(id: number, data: createOrder): Promise<any> {
+    try {
+      const user = await this.userModel.findOne({ where: { id } });
+
+      if (!user) {
+        throw new HttpException(
+          {
+            message: 'No User Found',
+          },
+          HttpStatus.NOT_FOUND,
+        );
+      }
+
+      const createdOrder = await this.ordersService.createOrder({ ...data, user })
+      // total orders count gets incemented in the user row
+      // const newOrder = this.orderModel.create({ ...data, user }); // move this to createOrder function in ordersService
+      
+      this.orderClient.emit({ cmd: 'order_created' }, { createdOrder })
+
+      // return success withthe created order
+      return { message: 'Success', createdOrder }
     } catch (err) {
       throw new HttpException(
         {

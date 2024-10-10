@@ -9,5 +9,7 @@ import { models } from 'apps/shared/common/model-exports';
   imports: [SharedModule, TypeOrmModule.forFeature(models)],
   controllers: [OrdersController],
   providers: [OrdersService],
+  exports: [OrdersService],
 })
+
 export class OrdersModule {}

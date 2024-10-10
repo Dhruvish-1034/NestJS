@@ -1,7 +1,8 @@
 import { Body, Controller, Get, ParseIntPipe, Patch, Post, Query } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { createOrderDTO, updateOrderDto } from './dtos/order.dto';
-//import { FileInterceptor } from '@nestjs/platform-express';
+import { EventPattern, Payload } from '@nestjs/microservices';
+import { Observable } from 'rxjs';
 
 @Controller('order')
 export class OrdersController {
@@ -15,18 +16,17 @@ export class OrdersController {
   //* --done make use of @nestjs/jwt package to implement basic jwt token-based auth
   //* --done create a file upload interceptor for user to upload his profile pic
   //* --done create a cron job that runs every hour and simple logs the number of total users in the database
-  //*        convert the orders app to a hybrid microservice
-  //*        convert pn:- 4 to a TCP microservice call instead of a REST API call (curve:- avoid deep-diving into observables)
+  //* --done convert the orders app to a hybrid microservice
+  //* --done convert pn:- 4 to a TCP microservice call instead of a REST API call (curve:- avoid deep-diving into observables)
   //* --done define a DTO for update user API | Create an update user API endpoint (make use of class-validator package)
   //* --done create a default scope that only active users should be fetched
-  //*        learn briefly about provide-inject pattern in nestjs; dependency injection; and what the IOC container does; types of providers
+  //* --done learn briefly about provide-inject pattern in nestjs; dependency injection; and what the IOC container does; types of providers
   
   //* let's do all this before 8th of October  
-  // @UseInterceptors(FileInterceptor)
   
-  @Post('create-order')
-  async  createOrder(@Query('id', ParseIntPipe) id: number ,@Body() createOrderDTO: createOrderDTO){
-    return await this.ordersService.createOrder(id, createOrderDTO)
+  @EventPattern({ cmd: 'order_created' })
+  async createOrderAck(@Payload() createOrderDTO: createOrderDTO){
+    return await this.ordersService.createOrderAck(createOrderDTO)
   }
 
   @Get('/get-order')

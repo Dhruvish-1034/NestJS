@@ -1,11 +1,9 @@
-import { IsInt } from "class-validator";
+import { IsInt, IsNotEmpty } from "class-validator";
 
 export class createOrderDTO {
-    @IsInt()
     no_of_items: number;
-
-    @IsInt()
     total_price: number;
+    user: any;
 }
 
 export class updateOrderDto {
